@@ -1,4 +1,5 @@
-export type AssetType = 'stock' | 'etf' | 'crypto' | 'bond' | 'real_estate' | 'cash' | 'other'
+export type Category     = 'Negocio' | 'Cash' | 'Deuda' | 'Bolsa'
+export type RiskProfile  = 'High' | 'Medium-high' | 'Medium' | 'Medium-low' | 'Low'
 export type TransactionType = 'buy' | 'sell' | 'dividend' | 'deposit' | 'withdrawal' | 'interest'
 
 export interface Profile {
@@ -10,24 +11,16 @@ export interface Profile {
   created_at: string
 }
 
-export interface AssetCategory {
-  id: string
-  user_id: string
-  name: string
-  color: string
-  created_at: string
-}
-
 export interface Asset {
   id: string
   user_id: string
   category_id: string | null
   name: string
   ticker: string | null
-  asset_type: AssetType
+  category: Category | null
+  risk_profile: RiskProfile | null
   currency: string
   created_at: string
-  category?: AssetCategory
 }
 
 export interface Transaction {
@@ -54,18 +47,23 @@ export interface PriceSnapshot {
   created_at: string
 }
 
+export interface NetWorthSnapshot {
+  id: string
+  user_id: string
+  value: number
+  date: string
+  notes: string | null
+  created_at: string
+}
+
 export interface Holding {
   user_id: string
   asset_id: string
   name: string
   ticker: string | null
-  asset_type: AssetType
+  category: Category | null
+  risk_profile: RiskProfile | null
   currency: string
-  category_id: string | null
   quantity: number
   avg_cost: number
-  current_price?: number
-  current_value?: number
-  pnl?: number
-  pnl_pct?: number
 }

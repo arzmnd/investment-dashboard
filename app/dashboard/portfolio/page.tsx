@@ -1,12 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { formatCurrency, formatNumber, ASSET_TYPE_LABELS } from '@/lib/utils'
+import { formatCurrency, formatNumber, CATEGORIES, RISK_PROFILES, CATEGORY_COLORS, RISK_COLORS } from '@/lib/utils'
 import type { Asset, Transaction, PriceSnapshot } from '@/lib/types'
 
 interface HoldingRow {
   asset: Asset; quantity: number; avgCost: number; totalCost: number
-  latestPrice: number | null; currentValue: number | null; pnl: number | null; pnlPct: number | null
+  latestPrice: number|null; currentValue: number|null; pnl: number|null; pnlPct: number|null
 }
 
 const inp: React.CSSProperties = { background:'transparent', border:'1px solid var(--border)', padding:'8px 10px', fontSize:'13px', color:'var(--text-md)', width:'100%', outline:'none' }
@@ -18,7 +18,7 @@ export default function PortfolioPage() {
   const [holdings, setHoldings] = useState<HoldingRow[]>([])
   const [loading, setLoading]   = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [newAsset, setNewAsset] = useState({ name:'', ticker:'', asset_type:'stock', currency:'USD' })
+  const [newAsset, setNewAsset] = useState({ name:'', ticker:'', category:'Bolsa', risk_profile:'Medium', currency:'USD' })
   const [saving, setSaving]     = useState(false)
 
   useEffect(() => { load() }, [])
@@ -55,12 +55,12 @@ export default function PortfolioPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     await supabase.from('assets').insert({ ...newAsset, user_id: user.id })
-    setNewAsset({ name:'', ticker:'', asset_type:'stock', currency:'USD' })
+    setNewAsset({ name:'', ticker:'', category:'Bolsa', risk_profile:'Medium', currency:'USD' })
     setShowForm(false); setSaving(false); load()
   }
 
   return (
-    <div style={{ maxWidth:'900px' }}>
+    <div style={{ maxWidth:'960px' }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:'40px' }}>
         <div>
           <p style={{ fontSize:'11px', color:'var(--text-muted)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:'4px' }}>Portafolio</p>
@@ -77,22 +77,24 @@ export default function PortfolioPage() {
       {showForm && (
         <div style={{ border:'1px solid var(--border)', padding:'24px', marginBottom:'32px' }}>
           <p style={{ fontSize:'12px', color:'var(--text-lo)', marginBottom:'20px' }}>Nuevo activo</p>
-          <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr 1fr', gap:'12px', marginBottom:'16px' }}>
-            {[{ label:'Nombre', field:'name', placeholder:'Apple Inc.' }, { label:'Ticker', field:'ticker', placeholder:'AAPL' }].map(f => (
-              <div key={f.field}>
-                <label style={lbl}>{f.label}</label>
-                <input style={inp} placeholder={f.placeholder} value={(newAsset as any)[f.field]}
-                  onChange={e => setNewAsset(p => ({ ...p, [f.field]: e.target.value }))} />
-              </div>
-            ))}
-            <div>
-              <label style={lbl}>Tipo</label>
-              <select style={inp} value={newAsset.asset_type} onChange={e => setNewAsset(p => ({ ...p, asset_type: e.target.value }))}>
-                {Object.entries(ASSET_TYPE_LABELS).map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+          <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr 1fr 1fr', gap:'12px', marginBottom:'16px' }}>
+            <div><label style={lbl}>Nombre</label>
+              <input style={inp} placeholder="Apple Inc." value={newAsset.name} onChange={e => setNewAsset(p => ({ ...p, name: e.target.value }))} />
+            </div>
+            <div><label style={lbl}>Ticker</label>
+              <input style={inp} placeholder="AAPL" value={newAsset.ticker} onChange={e => setNewAsset(p => ({ ...p, ticker: e.target.value.toUpperCase() }))} />
+            </div>
+            <div><label style={lbl}>Categoría</label>
+              <select style={inp} value={newAsset.category} onChange={e => setNewAsset(p => ({ ...p, category: e.target.value }))}>
+                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
-            <div>
-              <label style={lbl}>Divisa</label>
+            <div><label style={lbl}>Riesgo</label>
+              <select style={inp} value={newAsset.risk_profile} onChange={e => setNewAsset(p => ({ ...p, risk_profile: e.target.value }))}>
+                {RISK_PROFILES.map(r => <option key={r}>{r}</option>)}
+              </select>
+            </div>
+            <div><label style={lbl}>Divisa</label>
               <select style={inp} value={newAsset.currency} onChange={e => setNewAsset(p => ({ ...p, currency: e.target.value }))}>
                 {['USD','MXN','EUR','BTC'].map(c => <option key={c}>{c}</option>)}
               </select>
@@ -115,26 +117,30 @@ export default function PortfolioPage() {
       ) : (
         <table style={{ width:'100%', borderCollapse:'collapse' }}>
           <thead>
-            <tr>{['Activo','Tipo','Cantidad','Costo prom.','Costo total','Precio actual','Valor actual','P&L'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+            <tr>{['Activo','Categoría','Riesgo','Cantidad','Costo prom.','Costo total','Valor actual','P&L'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
           </thead>
           <tbody>
             {holdings.map(row => {
               const pnlColor = row.pnl===null ? 'var(--text-muted)' : row.pnl>=0 ? 'var(--green)' : 'var(--red)'
+              const catColor  = CATEGORY_COLORS[row.asset.category ?? ''] ?? 'var(--text-muted)'
+              const riskColor = RISK_COLORS[row.asset.risk_profile ?? ''] ?? 'var(--text-muted)'
               return (
                 <tr key={row.asset.id}
                   onMouseEnter={e => (e.currentTarget.style.background='var(--bg-subtle)')}
                   onMouseLeave={e => (e.currentTarget.style.background='transparent')}>
                   <td style={{ padding:'13px 16px', borderBottom:'1px solid var(--border-sub)' }}>
                     <p style={{ fontSize:'13px', color:'var(--text-hi)' }}>{row.asset.name}</p>
-                    {row.asset.ticker && <p style={{ fontSize:'11px', color:'var(--text-muted)', marginTop:'2px', fontFamily:"'JetBrains Mono', monospace" }}>{row.asset.ticker}</p>}
+                    {row.asset.ticker && <p style={{ fontSize:'11px', color:'var(--text-muted)', fontFamily:"'JetBrains Mono', monospace", marginTop:'2px' }}>{row.asset.ticker}</p>}
                   </td>
-                  <td style={{ padding:'13px 16px', fontSize:'11px', color:'var(--text-lo)', borderBottom:'1px solid var(--border-sub)' }}>{ASSET_TYPE_LABELS[row.asset.asset_type]??row.asset.asset_type}</td>
+                  <td style={{ padding:'13px 16px', borderBottom:'1px solid var(--border-sub)' }}>
+                    <span style={{ fontSize:'11px', color: catColor }}>{row.asset.category ?? '—'}</span>
+                  </td>
+                  <td style={{ padding:'13px 16px', borderBottom:'1px solid var(--border-sub)' }}>
+                    <span style={{ fontSize:'11px', color: riskColor }}>{row.asset.risk_profile ?? '—'}</span>
+                  </td>
                   <td style={{ padding:'13px 16px', fontFamily:"'JetBrains Mono', monospace", fontSize:'12px', color:'var(--text-lo)', borderBottom:'1px solid var(--border-sub)' }}>{formatNumber(row.quantity)}</td>
                   <td style={{ padding:'13px 16px', fontFamily:"'JetBrains Mono', monospace", fontSize:'12px', color:'var(--text-lo)', borderBottom:'1px solid var(--border-sub)' }}>{formatCurrency(row.avgCost,row.asset.currency)}</td>
                   <td style={{ padding:'13px 16px', fontFamily:"'JetBrains Mono', monospace", fontSize:'12px', color:'var(--text-lo)', borderBottom:'1px solid var(--border-sub)' }}>{formatCurrency(row.totalCost,row.asset.currency)}</td>
-                  <td style={{ padding:'13px 16px', fontFamily:"'JetBrains Mono', monospace", fontSize:'12px', color:'var(--text-lo)', borderBottom:'1px solid var(--border-sub)' }}>
-                    {row.latestPrice!==null ? formatCurrency(row.latestPrice,row.asset.currency) : <span style={{ color:'var(--text-faint)' }}>—</span>}
-                  </td>
                   <td style={{ padding:'13px 16px', fontFamily:"'JetBrains Mono', monospace", fontSize:'13px', color:'var(--text-hi)', borderBottom:'1px solid var(--border-sub)' }}>
                     {row.currentValue!==null ? formatCurrency(row.currentValue,row.asset.currency) : <span style={{ color:'var(--text-faint)' }}>—</span>}
                   </td>
