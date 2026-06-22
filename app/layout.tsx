@@ -9,22 +9,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
         <style>{`
           *, *::before, *::after { box-sizing: border-box; }
           * { margin: 0; padding: 0; }
           body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-            background: #060810;
-            color: #e2e8f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #0c0c0c;
+            color: #d4d4d4;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            font-size: 13px;
           }
           a { color: inherit; text-decoration: none; }
           button { font-family: inherit; cursor: pointer; }
           input, select, textarea { font-family: inherit; }
-          ::-webkit-scrollbar { width: 6px; }
+          .mono { font-family: 'JetBrains Mono', 'SF Mono', monospace; }
+          ::-webkit-scrollbar { width: 4px; }
           ::-webkit-scrollbar-track { background: transparent; }
-          ::-webkit-scrollbar-thumb { background: #1c1c28; border-radius: 3px; }
+          ::-webkit-scrollbar-thumb { background: #2a2a2a; }
         `}</style>
       </head>
       <body>{children}</body>
