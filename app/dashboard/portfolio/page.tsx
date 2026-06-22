@@ -130,7 +130,7 @@ export default function PortfolioPage() {
                   onMouseLeave={e => (e.currentTarget.style.background='transparent')}>
                   <td style={{ padding:'13px 16px', borderBottom:'1px solid var(--border-sub)' }}>
                     <p style={{ fontSize:'13px', color:'var(--text-hi)' }}>{row.asset.name}</p>
-                    {row.asset.ticker && <p style={{ fontSize:'11px', color:'var(--text-muted)', fontFamily:"'JetBrains Mono', monospace", marginTop:'2px' }}>{row.asset.ticker}</p>}
+                    {row.asset.activo && <p style={{ fontSize:'11px', color:'var(--text-muted)', fontFamily:"'JetBrains Mono', monospace", marginTop:'2px' }}>{row.asset.activo}</p>}
                   </td>
                   <td style={{ padding:'13px 16px', borderBottom:'1px solid var(--border-sub)' }}>
                     <span style={{ fontSize:'11px', color: catColor }}>{row.asset.category ?? '—'}</span>

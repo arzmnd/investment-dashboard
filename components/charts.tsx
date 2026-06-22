@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { formatCurrency, formatPercent } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 
 // ── Mini Pie Chart (SVG) ──────────────────────────────────
 function PieChart({ data, colors, total, title }: {
