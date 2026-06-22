@@ -33,7 +33,6 @@ export interface NetWorthSnapshot {
   date: string; notes: string | null; created_at: string
 }
 
-// Para el bulk import
 export interface BulkRow {
   raw: Record<string, string>
   lineNumber: number
@@ -41,7 +40,7 @@ export interface BulkRow {
   errors: string[]
   warnings: string[]
   parsed?: {
-    fecha: string           // YYYY-MM-DD
+    fecha: string
     operacion: TransactionType
     tipo: Category
     activo: string
@@ -49,6 +48,7 @@ export interface BulkRow {
     divisa: Currency
     precio_unitario?: number
     total: number
+    tipo_cambio: number
     notas?: string
   }
 }

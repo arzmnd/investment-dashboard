@@ -40,18 +40,6 @@ export function parseDMY(dateStr: string): string | null {
   return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`
 }
 
-// Fetch tipo de cambio MXN→USD para una fecha dada
-export async function fetchExchangeRate(date: string): Promise<number | null> {
-  try {
-    const res = await fetch(`https://api.frankfurter.app/${date}?from=MXN&to=USD`)
-    if (!res.ok) return null
-    const data = await res.json()
-    return data?.rates?.USD ?? null
-  } catch {
-    return null
-  }
-}
-
 // Generar y descargar CSV en el browser
 export function downloadCSV(filename: string, headers: string[], rows: string[][]): void {
   const lines = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))]
