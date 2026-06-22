@@ -1,6 +1,7 @@
 'use client'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useTheme } from '@/components/theme-provider'
 import type { User } from '@supabase/supabase-js'
 
 const NAV_ITEMS = [
@@ -13,6 +14,7 @@ export function Sidebar({ user }: { user: User }) {
   const pathname = usePathname()
   const router   = useRouter()
   const supabase = createClient()
+  const { theme, toggle } = useTheme()
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -25,18 +27,20 @@ export function Sidebar({ user }: { user: User }) {
     <aside style={{
       width: '200px',
       minHeight: '100vh',
-      borderRight: '1px solid #1a1a1a',
+      borderRight: '1px solid var(--border)',
       display: 'flex',
       flexDirection: 'column',
       padding: '32px 0',
       flexShrink: 0,
+      background: 'var(--bg)',
+      transition: 'background 0.2s, border-color 0.2s',
     }}>
       {/* Logo */}
       <div style={{ padding: '0 28px 40px' }}>
         <p style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: '11px',
-          color: '#444',
+          color: 'var(--text-muted)',
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
         }}>
@@ -49,20 +53,17 @@ export function Sidebar({ user }: { user: User }) {
         {NAV_ITEMS.map(item => {
           const active = pathname === item.href
           return (
-            <a
-              key={item.href}
-              href={item.href}
-              style={{
-                display: 'block',
-                padding: '7px 12px',
-                fontSize: '13px',
-                color: active ? '#e8e8e8' : '#555',
-                background: active ? '#181818' : 'transparent',
-                transition: 'color 0.1s',
-                borderLeft: active ? '1px solid #444' : '1px solid transparent',
-              }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.color = '#888' }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.color = '#555' }}
+            <a key={item.href} href={item.href} style={{
+              display: 'block',
+              padding: '7px 12px',
+              fontSize: '13px',
+              color: active ? 'var(--text-hi)' : 'var(--text-muted)',
+              background: active ? 'var(--bg-subtle)' : 'transparent',
+              borderLeft: active ? '1px solid var(--text-lo)' : '1px solid transparent',
+              transition: 'color 0.1s',
+            }}
+              onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'var(--text-lo)' }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'var(--text-muted)' }}
             >
               {item.label}
             </a>
@@ -70,20 +71,32 @@ export function Sidebar({ user }: { user: User }) {
         })}
       </nav>
 
-      {/* User */}
-      <div style={{ padding: '24px 28px 0', borderTop: '1px solid #1a1a1a', marginTop: '16px' }}>
-        <p style={{ fontSize: '12px', color: '#444', marginBottom: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      {/* Bottom */}
+      <div style={{ padding: '20px 28px 0', borderTop: '1px solid var(--border)', marginTop: '16px' }}>
+        {/* Theme toggle */}
+        <button onClick={toggle} style={{
+          background: 'transparent', border: 'none', padding: '0',
+          fontSize: '12px', color: 'var(--text-muted)',
+          marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px',
+          transition: 'color 0.1s',
+        }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-lo)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+        >
+          <span style={{ fontSize: '14px' }}>{theme === 'dark' ? '○' : '●'}</span>
+          {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+        </button>
+
+        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {name}
         </p>
-        <button
-          onClick={signOut}
-          style={{
-            background: 'transparent', border: 'none',
-            fontSize: '12px', color: '#3a3a3a', padding: '0',
-            transition: 'color 0.1s',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#888')}
-          onMouseLeave={e => (e.currentTarget.style.color = '#3a3a3a')}
+        <button onClick={signOut} style={{
+          background: 'transparent', border: 'none',
+          fontSize: '12px', color: 'var(--text-faint)', padding: '0',
+          transition: 'color 0.1s',
+        }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-lo)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-faint)')}
         >
           Cerrar sesión
         </button>
